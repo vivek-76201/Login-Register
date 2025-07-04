@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class UserRegister {
@@ -17,6 +19,16 @@ public class UserRegister {
 	private String email;
 	private String username;
 	private long phone;
+	
+	@OneToOne
+	@JoinColumn(name="hobby_id")
+	private Hobby hobby;
+	public Hobby getHobby() {
+		return hobby;
+	}
+	public void setHobby(Hobby hobby) {
+		this.hobby = hobby;
+	}
 	public int getId() {
 		return id;
 	}

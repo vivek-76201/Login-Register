@@ -54,6 +54,7 @@ public  ResponseEntity<ResponseStructure<UserRegister>> getOneUSer(@RequestBody 
 		rs.setBody(user1);
 		return new ResponseEntity<>(rs,HttpStatus.OK);
 }
+
 @PutMapping("/changepassword")
 public ResponseEntity<ResponseStructure<UserRegister>> changePassword(@RequestBody UserRegister user){
 	  ResponseStructure<UserRegister> rs = new ResponseStructure<>();

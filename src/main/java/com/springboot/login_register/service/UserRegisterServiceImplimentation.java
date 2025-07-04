@@ -45,5 +45,7 @@ public class UserRegisterServiceImplimentation implements UserRegisterService{
 			return null;
 		}
 	}
+	
+
 
 }
