@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
+
+// Styled Components
 
 const Container = styled.div`
   background: #f0f4f8;
@@ -37,7 +39,7 @@ const Title = styled.h2`
 const Input = styled.input`
   width: 100%;
   padding: 12px 15px;
-  margin-bottom: 20px;
+  margin-bottom: 5px; /* less margin to error msg */
   border: 1.8px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
@@ -47,6 +49,19 @@ const Input = styled.input`
     border-color: #0077ff;
     outline: none;
   }
+
+  ${props =>
+    props.invalid &&
+    css`
+      border-color: #d32f2f;
+    `}
+`;
+
+const ErrorMsgField = styled.p`
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin: 0 0 15px 5px;
+  font-weight: 600;
 `;
 
 const Button = styled.button`
@@ -83,8 +98,15 @@ const LinkStyled = styled(Link)`
   }
 `;
 
-const ErrorMsg = styled.p`
+const GeneralErrorMsg = styled.p`
   color: #d32f2f;
+  margin-bottom: 15px;
+  font-weight: 600;
+  text-align: center;
+`;
+
+const SuccessMsg = styled.p`
+  color: green;
   margin-bottom: 15px;
   font-weight: 600;
   text-align: center;
@@ -92,54 +114,125 @@ const ErrorMsg = styled.p`
 
 function Login({ onLoginSuccess }) {
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [forgotMode, setForgotMode] = useState(false);
+  const [generalError, setGeneralError] = useState('');
+  const [success, setSuccess] = useState('');
+  // Store per-field error messages
+  const [fieldErrors, setFieldErrors] = useState({
+    username: '',
+    password: ''
+  });
+
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setError('');
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  // Validate form and return true if valid, else set fieldErrors
+  const validateForm = () => {
+    const errors = { username: '', password: '' };
+
+    if (formData.username.trim().length < 3) {
+      errors.username = 'Username must be at least 3 characters.';
+    }
+
+    if (formData.password.trim().length < 6) {
+      errors.password = forgotMode
+        ? 'New password must be at least 6 characters.'
+        : 'Password must be at least 6 characters.';
+    }
+
+    setFieldErrors(errors);
+
+    return Object.values(errors).every(msg => msg === '');
   };
 
-  const handleSubmit = async (e) => {
+  const handleChange = e => {
+    setGeneralError('');
+    setSuccess('');
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Clear the specific field error on change
+    setFieldErrors(prev => ({ ...prev, [name]: '' }));
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      setGeneralError('Please fix the errors below.');
+      return;
+    }
+
     try {
-      const res = await axios.post('http://localhost:8080/user/login', formData);
-      localStorage.setItem('loggedInUser', JSON.stringify(res.data.body));
-      onLoginSuccess(res.data.body);
-      navigate('/profile');
+      if (forgotMode) {
+        // Change password
+        await axios.put('http://localhost:8080/user/changepassword', formData);
+        setSuccess('Password changed successfully. Please log in.');
+        setFormData({ username: '', password: '' });
+        setForgotMode(false);
+      } else {
+        // Login
+        const res = await axios.post('http://localhost:8080/user/login', formData);
+        localStorage.setItem('loggedInUser', JSON.stringify(res.data.body));
+        onLoginSuccess(res.data.body);
+        navigate('/profile');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+      setGeneralError(err.response?.data?.message || 'Something went wrong.');
     }
   };
 
   return (
     <Container>
       <Form onSubmit={handleSubmit}>
-        <Title>Login to Your Account</Title>
-        {error && <ErrorMsg>{error}</ErrorMsg>}
+        <Title>{forgotMode ? 'Reset Your Password' : 'Login to Your Account'}</Title>
+
+        {generalError && <GeneralErrorMsg>{generalError}</GeneralErrorMsg>}
+        {success && <SuccessMsg>{success}</SuccessMsg>}
+
         <Input
           type="text"
           name="username"
           placeholder="Username"
           value={formData.username}
           onChange={handleChange}
-          required
           autoComplete="username"
+          required
+          invalid={!!fieldErrors.username}
         />
+        {fieldErrors.username && <ErrorMsgField>{fieldErrors.username}</ErrorMsgField>}
+
         <Input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder={forgotMode ? 'New Password' : 'Password'}
           value={formData.password}
           onChange={handleChange}
+          autoComplete={forgotMode ? 'new-password' : 'current-password'}
           required
-          autoComplete="current-password"
+          invalid={!!fieldErrors.password}
         />
-        <Button type="submit">Login</Button>
+        {fieldErrors.password && <ErrorMsgField>{fieldErrors.password}</ErrorMsgField>}
+
+        <Button type="submit">{forgotMode ? 'Change Password' : 'Login'}</Button>
+
         <Text>
-          Don't have an account? <LinkStyled to="/register">Register</LinkStyled>
+          {forgotMode ? (
+            <>
+              Remembered your password?{' '}
+              <LinkStyled onClick={() => setForgotMode(false)}>Login</LinkStyled>
+            </>
+          ) : (
+            <>
+              <LinkStyled onClick={() => setForgotMode(true)}>Forgot Password?</LinkStyled>
+            </>
+          )}
         </Text>
+
+        {!forgotMode && (
+          <Text>
+            Don't have an account? <LinkStyled to="/register">Register</LinkStyled>
+          </Text>
+        )}
       </Form>
     </Container>
   );

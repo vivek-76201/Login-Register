@@ -36,6 +36,14 @@ public class UserRegisterServiceImplimentation implements UserRegisterService{
 		}
 	}
 
-
+	public UserRegister changepasswordservice(String usernname, String password) {
+		if(usr.existsByUsername(usernname)) {
+		UserRegister user1=usr.findByUsername(usernname);
+		user1.setPassword(password);
+		return usr.save(user1);
+		}else {
+			return null;
+		}
+	}
 
 }

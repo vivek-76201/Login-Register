@@ -12,4 +12,5 @@ public interface UserRegisterService {
 List <UserRegister> getAllUser();
 UserRegister createUser(UserRegister user);
 UserRegister getuseronly(String usernname,String password);
+UserRegister changepasswordservice(String usernname, String password);
 }

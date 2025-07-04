@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,5 +53,16 @@ public  ResponseEntity<ResponseStructure<UserRegister>> getOneUSer(@RequestBody 
 		rs.setMessage("sucess");
 		rs.setBody(user1);
 		return new ResponseEntity<>(rs,HttpStatus.OK);
+}
+@PutMapping("/changepassword")
+public ResponseEntity<ResponseStructure<UserRegister>> changePassword(@RequestBody UserRegister user){
+	  ResponseStructure<UserRegister> rs = new ResponseStructure<>();
+	  UserRegister user1=urs.changepasswordservice(user.getUsername(),user.getPassword());
+		rs.setCode(200);
+		rs.setMessage("sucess");
+		rs.setBody(user1);
+		return new ResponseEntity<>(rs,HttpStatus.OK);
+
+	
 }
 }
