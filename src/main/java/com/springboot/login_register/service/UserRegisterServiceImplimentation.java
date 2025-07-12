@@ -13,6 +13,10 @@ public class UserRegisterServiceImplimentation implements UserRegisterService{
 @Autowired
 	private UserRegisterRepository usr;
 	
+@Autowired
+private MailService mailService;
+
+
 	@Override
 	public List<UserRegister> getAllUser() {
 		 List<UserRegister> ur	=usr.findAll();
@@ -30,21 +34,37 @@ public class UserRegisterServiceImplimentation implements UserRegisterService{
 	public UserRegister getuseronly(String usernname, String password) {
 		if(usr.existsByUsername(usernname) && usr.existsByPassword(password)) {
 		UserRegister user1=usr.findByUsername(usernname);
+		 mailService.sendMail(
+		            user1.getEmail(),
+		            "Login Successful",
+		            "Hello " + user1.getName() + ",\n\nYou have successfully logged into your account."
+		        );
+
 		return user1;
+		
 		}else {
 			return null;
 		}
+	}
+	@Override
+	public UserRegister changepasswordservice(String username, String password) {
+	    if (usr.existsByUsername(username)) {
+	        UserRegister user1 = usr.findByUsername(username);
+	        user1.setPassword(password);
+	        UserRegister updatedUser = usr.save(user1);
+
+	        mailService.sendMail(
+	            updatedUser.getEmail(),
+	            "Password Changed",
+	            "Hi " + updatedUser.getName() + ",\n\nYour password has been successfully updated."
+	        );
+
+	        return updatedUser;
+	    } else {
+	        return null;
+	    }
 	}
 
-	public UserRegister changepasswordservice(String usernname, String password) {
-		if(usr.existsByUsername(usernname)) {
-		UserRegister user1=usr.findByUsername(usernname);
-		user1.setPassword(password);
-		return usr.save(user1);
-		}else {
-			return null;
-		}
-	}
 	
 
 

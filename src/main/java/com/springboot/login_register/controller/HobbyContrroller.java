@@ -22,7 +22,7 @@ import com.springboot.login_register.service.HobbyServiceImplementation;
 public class HobbyContrroller {
 	@Autowired
 private HobbyServiceImplementation hsi;
-	
+
 	
 	@PostMapping("/save")
 	public ResponseEntity<ResponseStructure<Hobby>> postHobby(@RequestBody Hobby hobby) {

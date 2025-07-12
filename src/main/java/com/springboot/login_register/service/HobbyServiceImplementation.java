@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.stereotype.Service;
 
 import com.springboot.login_register.entity.Hobby;
@@ -21,6 +22,9 @@ public class HobbyServiceImplementation implements HobbyService{
 	@Autowired
 	private HobbyRepository hr;
 	
+
+	
+
 	public Hobby saveHobby(Hobby hobby) {
 //	Hobby hobby1 =hr.findByHid(hid);
 		
